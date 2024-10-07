@@ -7,12 +7,12 @@ import (
 	"gorm.io/gorm"
 )
 
-type database struct {
+type Database struct {
 	*gorm.DB
 	connection *Connection
 }
 
-func (x *database) Get() *gorm.DB {
+func (x *Database) Get() *gorm.DB {
 	var reconnect bool
 	if x.DB == nil {
 		reconnect = true

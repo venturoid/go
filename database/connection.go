@@ -31,7 +31,7 @@ type Connection struct {
 	Configuration
 }
 
-func NewConnection(config Connection) (*database, error) {
+func NewConnection(config Connection) (*Database, error) {
 	// set default values
 	if config.Retries == 0 {
 		config.Retries = 3
@@ -70,7 +70,7 @@ func NewConnection(config Connection) (*database, error) {
 		}
 	}
 
-	return &database{
+	return &Database{
 		DB:         db,
 		connection: &config,
 	}, nil
