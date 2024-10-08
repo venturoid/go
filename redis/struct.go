@@ -28,10 +28,6 @@ func (o *Options) Validate() error {
 		return errors.New("redis username is required")
 	}
 
-	if o.Password == "" {
-		return errors.New("redis password is required")
-	}
-
 	if o.Repository == "" {
 		return errors.New("redis repository name is required")
 	}
