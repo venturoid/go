@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"reflect"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -133,12 +134,14 @@ func (r *Redis) GetWithBind(key string, result interface{}) (err error) {
 // Set is a function to set data to redis within specific duration
 // if duration is nil, it will set data to 24 hours
 func (r *Redis) Set(key string, value interface{}, duration *time.Duration) error {
-	var data string
-	if res, err := json.Marshal(value); err != nil {
-		log.Println("error marshal data : ", err.Error())
-		return errors.New("error marshal data")
-	} else {
-		data = string(res)
+	data := value
+	if reflect.TypeOf(value).Kind() == reflect.Array || reflect.TypeOf(value).Kind() == reflect.Slice || reflect.TypeOf(value).Kind() == reflect.Map || reflect.TypeOf(value).Kind() == reflect.Struct {
+		if res, err := json.Marshal(value); err != nil {
+			log.Println("error marshal data : ", err.Error())
+			return errors.New("error marshal data")
+		} else {
+			data = string(res)
+		}
 	}
 
 	/* if duration is nil, set data to default duration */
