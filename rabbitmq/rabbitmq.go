@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"reflect"
 	"strconv"
 	"sync"
 	"time"
@@ -143,28 +142,6 @@ func (rmq *Rabbit) PublishMessage(queueConf Queue, body interface{}, waitRespons
 		}
 	}
 
-	// Prepare the message
-	key := uuid.New().String()
-	var request interface{}
-	if reflect.TypeOf(body).Kind() == reflect.Struct || reflect.TypeOf(body).Kind() == reflect.Map {
-		bodyByte, err := json.Marshal(body)
-		if err != nil {
-			response.Status = 500
-			response.Message = err.Error()
-			return response, fmt.Errorf("failed to marshal body")
-		}
-		var temp map[string]interface{}
-		if err := json.Unmarshal(bodyByte, &temp); err != nil {
-			response.Status = 500
-			response.Message = err.Error()
-			return response, fmt.Errorf("failed to unmarshal body")
-		}
-		temp["RedisKey"] = key
-		request = temp
-	} else {
-		request = body
-	}
-
 	// Create channel
 	channel, err := rmq.getConnection().Channel()
 	if err != nil {
@@ -206,8 +183,14 @@ func (rmq *Rabbit) PublishMessage(queueConf Queue, body interface{}, waitRespons
 	if useRedis {
 		replyTo = "redis"
 	}
+	key := uuid.New().String()
 
 	// Publish the message
+	header := amqp.Table{}
+	if useRedis {
+		header["redis-key"] = key
+	}
+
 	ctx := context.Background()
 	err = channel.PublishWithContext(
 		ctx,
@@ -219,9 +202,10 @@ func (rmq *Rabbit) PublishMessage(queueConf Queue, body interface{}, waitRespons
 			ContentType:   "application/json",
 			CorrelationId: corrId,
 			ReplyTo:       replyTo,
-			Body:          []byte(JSONEncode(request)),
+			Body:          []byte(JSONEncode(body)),
 			Expiration:    "60000",
 			MessageId:     uuid.New().String(),
+			Headers:       header,
 		},
 	)
 	if err != nil {
@@ -229,7 +213,7 @@ func (rmq *Rabbit) PublishMessage(queueConf Queue, body interface{}, waitRespons
 		response.Message = err.Error()
 		return response, fmt.Errorf("failed to publish message")
 	}
-	log.Println("publish :", request)
+	log.Println("publish :", body)
 
 	if useRedis {
 		return rmq.handleRedisResponse(key)
