@@ -1,4 +1,4 @@
-package resp
+package stdresp
 
 // Meta represents pagination metadata, with optional fields using omitempty
 type Meta struct {
