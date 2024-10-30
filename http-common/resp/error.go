@@ -2,12 +2,11 @@ package resp
 
 import (
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/venturoid/go/http-common/derror"
-	"github.com/venturoid/go/logger"
-	"go.uber.org/zap"
 )
 
 type Responder struct {
@@ -42,7 +41,7 @@ func (r *Responder) Standard(code int, status, message string, data interface{})
 // Error creates an error response with optional internal error logging
 func (r *Responder) Error(code int, status, message string, internalError error) StandardResponse {
 	if internalError != nil {
-		logger.Zap.Debug("Internal Error", zap.String("error", internalError.Error()))
+		log.Println("Internal Error", internalError.Error())
 	}
 	return r.Standard(code, status, message, nil)
 }
