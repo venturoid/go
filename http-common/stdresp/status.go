@@ -1,4 +1,4 @@
-package resp
+package stdresp
 
 const (
 	UnauthorizedStatus   = "UNAUTHORIZED"
