@@ -16,11 +16,11 @@ type Responder struct {
 
 // StandardResponse unified response payload
 type StandardResponse struct {
-	Code      int         `json:"code"`
+	Code      int         `json:"status_code"`
 	Status    string      `json:"status,omitempty"`
 	Message   string      `json:"message"`
-	Data      interface{} `json:"data,omitempty"`
-	Signature string      `json:"data,omitempty"`
+	Data      interface{} `json:"data"`
+	Signature string      `json:"signature,omitempty"`
 }
 
 func New(e echo.Context) *Responder {
