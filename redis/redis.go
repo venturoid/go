@@ -177,3 +177,33 @@ func (r *Redis) Delete(key string) error {
 	}
 	return nil
 }
+
+// CheckKey is a function to check whether all keys is exist in redis
+func (r *Redis) CheckKey(keys []string) (bool, error) {
+	log.Println("check key redis : ", keys)
+	if res := r.client.Exists(r.ctx, keys...); res.Err() != nil {
+		log.Println("error check key exists on redis : ", res.Err().Error())
+		return false, errors.New("error check key exists on redis")
+	} else {
+		if r.logger {
+			log.Println("successfully check key exsist from redis : ", res.Val())
+		}
+
+		return len(keys) == int(res.Val()), nil
+	}
+}
+
+// Delete multiple is a function to delete multiple data from redis
+func (r *Redis) DeleteMultiple(keys []string) (int, error) {
+	log.Println("delete multiple key redis : ", keys)
+	if res := r.client.Del(r.ctx, keys...); res.Err() != nil {
+		log.Println("error delete data from redis : ", res.Err().Error())
+		return 0, errors.New("error delete data from redis")
+	} else {
+		if r.logger {
+			log.Printf("successfully delete data (%+v) from redis", keys)
+		}
+
+		return int(res.Val()), nil
+	}
+}
