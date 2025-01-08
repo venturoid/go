@@ -135,12 +135,14 @@ func (r *Redis) GetWithBind(key string, result interface{}) (err error) {
 // if duration is nil, it will set data to 24 hours
 func (r *Redis) Set(key string, value interface{}, duration *time.Duration) error {
 	data := value
-	if reflect.TypeOf(value).Kind() == reflect.Array || reflect.TypeOf(value).Kind() == reflect.Slice || reflect.TypeOf(value).Kind() == reflect.Map || reflect.TypeOf(value).Kind() == reflect.Struct {
-		if res, err := json.Marshal(value); err != nil {
-			log.Println("error marshal data : ", err.Error())
-			return errors.New("error marshal data")
-		} else {
-			data = string(res)
+	if value != nil {
+		if reflect.TypeOf(value).Kind() == reflect.Array || reflect.TypeOf(value).Kind() == reflect.Slice || reflect.TypeOf(value).Kind() == reflect.Map || reflect.TypeOf(value).Kind() == reflect.Struct {
+			if res, err := json.Marshal(value); err != nil {
+				log.Println("error marshal data : ", err.Error())
+				return errors.New("error marshal data")
+			} else {
+				data = string(res)
+			}
 		}
 	}
 
