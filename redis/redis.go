@@ -209,3 +209,76 @@ func (r *Redis) DeleteMultiple(keys []string) (int, error) {
 		return int(res.Val()), nil
 	}
 }
+
+// LPush pushes one or more values to the left of the Redis list specified by the key.
+// It returns the length of the list after the push operation and an error if any occurs.
+func (r *Redis) LPush(key string, values ...interface{}) (int64, error) {
+	log.Println("[INFO] LPush - Starting operation with key:", key)
+	log.Printf("[DEBUG] LPush - Values: %+v\n", values)
+
+	res, err := r.client.LPush(r.ctx, key, values...).Result()
+	if err != nil {
+		log.Printf("[ERROR] LPush - Failed to push values to key '%s': %v\n", key, err)
+		return 0, errors.New("error pushing data to Redis list")
+	}
+
+	if r.logger {
+		log.Printf("[INFO] LPush - Successfully pushed values to key '%s', new list length: %d\n", key, res)
+	}
+	return res, nil
+}
+
+// RPush pushes one or more values to the right of the Redis list specified by the key.
+// It returns the length of the list after the push operation and an error if any occurs.
+func (r *Redis) RPush(key string, values ...interface{}) (int64, error) {
+	log.Println("[INFO] RPush - Starting operation with key:", key)
+	log.Printf("[DEBUG] RPush - Values: %+v\n", values)
+
+	res, err := r.client.RPush(r.ctx, key, values...).Result()
+	if err != nil {
+		log.Printf("[ERROR] RPush - Failed to push values to key '%s': %v\n", key, err)
+		return 0, errors.New("error pushing data to Redis list")
+	}
+
+	if r.logger {
+		log.Printf("[INFO] RPush - Successfully pushed values to key '%s', new list length: %d\n", key, res)
+	}
+	return res, nil
+}
+
+// LRange retrieves a range of elements from the Redis list stored at the specified key.
+// The range is defined by the start and stop indexes (inclusive).
+// It returns the list of elements and an error if any occurs.
+func (r *Redis) LRange(key string, start, stop int64) ([]string, error) {
+	log.Println("[INFO] LRange - Starting operation with key:", key)
+	log.Printf("[DEBUG] LRange - Start: %d, Stop: %d\n", start, stop)
+
+	res, err := r.client.LRange(r.ctx, key, start, stop).Result()
+	if err != nil {
+		log.Printf("[ERROR] LRange - Failed to retrieve range for key '%s': %v\n", key, err)
+		return []string{}, errors.New("error retrieving data from Redis list")
+	}
+
+	if r.logger {
+		log.Printf("[INFO] LRange - Successfully retrieved range for key '%s': %+v\n", key, res)
+	}
+	return res, nil
+}
+
+// LRem removes the specified number of occurrences (count) of a value from the Redis list at the specified key.
+// It returns the number of removed elements and an error if any occurs.
+func (r *Redis) LRem(key string, count int64, value interface{}) (int64, error) {
+	log.Println("[INFO] LRem - Starting operation with key:", key)
+	log.Printf("[DEBUG] LRem - Count: %d, Value: %+v\n", count, value)
+
+	res, err := r.client.LRem(r.ctx, key, count, value).Result()
+	if err != nil {
+		log.Printf("[ERROR] LRem - Failed to remove value from key '%s': %v\n", key, err)
+		return 0, errors.New("error removing data from Redis list")
+	}
+
+	if r.logger {
+		log.Printf("[INFO] LRem - Successfully removed value from key '%s', removed count: %d\n", key, res)
+	}
+	return res, nil
+}
